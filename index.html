@@ -75,6 +75,7 @@
             width="100%" 
             height="650" 
             frameborder="0"
+            sandbox="allow-forms allow-scripts allow-same-origin"
             style="border:none; border-radius:10px;">
         </iframe>
         
@@ -83,41 +84,6 @@
 
 <!-- YouTube API -->
 <script src="https://www.youtube.com/iframe_api"></script>
-
-<script>
-let player;
-let lastTime = 0;
-let allowSeek = false;
-
-function onYouTubeIframeAPIReady() {
-    player = new YT.Player('video', {
-        events: {
-            'onStateChange': onPlayerStateChange
-        }
-    });
-
-    setInterval(trackProgress, 1000);
-}
-
-function trackProgress() {
-    if (!player || !player.getCurrentTime) return;
-
-    let currentTime = player.getCurrentTime();
-
-    // Prevent skipping forward
-    if (currentTime > lastTime + 2 && !allowSeek) {
-        player.seekTo(lastTime);
-    } else {
-        lastTime = currentTime;
-    }
-}
-
-function onPlayerStateChange(event) {
-    if (event.data === YT.PlayerState.ENDED) {
-        allowSeek = true;
-        document.getElementById("confirmSection").style.display = "block";
-    }
-}
 
 <script>
 let player;
@@ -145,7 +111,7 @@ function trackProgress() {
 
     let currentTime = player.getCurrentTime();
 
-    // Track max watched point
+    // Track max watched time
     if (currentTime > maxWatched) {
         maxWatched = currentTime;
     }
@@ -164,12 +130,9 @@ function onPlayerStateChange(event) {
         let watchedPercent = (maxWatched / videoDuration) * 100;
 
         if (watchedPercent >= 90) {
-            // ✅ Legit watched
             document.getElementById("confirmSection").style.display = "block";
         } else {
-            // ❌ Skipped to end
             alert("Please watch the video fully before proceeding.");
-
             player.seekTo(maxWatched - 2);
             player.playVideo();
         }
