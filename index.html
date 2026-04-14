@@ -119,6 +119,63 @@ function onPlayerStateChange(event) {
     }
 }
 
+<script>
+let player;
+let lastTime = 0;
+let maxWatched = 0;
+let videoDuration = 0;
+
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player('video', {
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+        }
+    });
+
+    setInterval(trackProgress, 1000);
+}
+
+function onPlayerReady(event) {
+    videoDuration = player.getDuration();
+}
+
+function trackProgress() {
+    if (!player || !player.getCurrentTime) return;
+
+    let currentTime = player.getCurrentTime();
+
+    // Track max watched point
+    if (currentTime > maxWatched) {
+        maxWatched = currentTime;
+    }
+
+    // Prevent skipping forward
+    if (currentTime > lastTime + 2) {
+        player.seekTo(lastTime);
+    } else {
+        lastTime = currentTime;
+    }
+}
+
+function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.ENDED) {
+
+        let watchedPercent = (maxWatched / videoDuration) * 100;
+
+        if (watchedPercent >= 90) {
+            // ✅ Legit watched
+            document.getElementById("confirmSection").style.display = "block";
+        } else {
+            // ❌ Skipped to end
+            alert("Please watch the video fully before proceeding.");
+
+            player.seekTo(maxWatched - 2);
+            player.playVideo();
+        }
+    }
+}
+
 function unlockForm() {
     let check = document.getElementById("confirmCheck");
 
@@ -128,6 +185,7 @@ function unlockForm() {
     }
 
     document.getElementById("formSection").style.display = "block";
+
     window.scrollTo({
         top: document.getElementById("formSection").offsetTop,
         behavior: "smooth"
