@@ -1,1 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Security Awareness Training</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
 
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 900px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        #confirmSection, #formSection {
+            display: none;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #005ea6;
+        }
+
+        iframe {
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Security Awareness Training</h2>
+    <p>Please watch the full video before proceeding.</p>
+
+    <!-- YouTube Video -->
+    <iframe id="video"
+        width="100%" height="450"
+        src="https://www.youtube.com/embed/hSslek8juAg?enablejsapi=1&controls=1&rel=0"
+        frameborder="0"
+        allowfullscreen>
+    </iframe>
+
+    <!-- Confirmation Section -->
+    <div id="confirmSection">
+        <p>
+            <input type="checkbox" id="confirmCheck">
+            I confirm I have watched the full video
+        </p>
+        <button onclick="unlockForm()">Proceed to Form</button>
+    </div>
+
+    <!-- Microsoft Form -->
+    <div id="formSection">
+        <h3>Complete the Form</h3>
+        <iframe src="https://forms.office.com/Pages/ResponsePage.aspx?id=QYkuO0h5MUGXirLfxylQkSnsxstmwotPgIDxFNOIcqRUOUk2VDJQUlJKUkZEUEJCVk1QMTBORVJCUC4u"
+            width="100%" height="600">
+        </iframe>
+    </div>
+</div>
+
+<!-- YouTube API -->
+<script src="https://www.youtube.com/iframe_api"></script>
+
+<script>
+let player;
+let lastTime = 0;
+let allowSeek = false;
+
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player('video', {
+        events: {
+            'onStateChange': onPlayerStateChange
+        }
+    });
+
+    setInterval(trackProgress, 1000);
+}
+
+function trackProgress() {
+    if (!player || !player.getCurrentTime) return;
+
+    let currentTime = player.getCurrentTime();
+
+    // Prevent skipping forward
+    if (currentTime > lastTime + 2 && !allowSeek) {
+        player.seekTo(lastTime);
+    } else {
+        lastTime = currentTime;
+    }
+}
+
+function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.ENDED) {
+        allowSeek = true;
+        document.getElementById("confirmSection").style.display = "block";
+    }
+}
+
+function unlockForm() {
+    let check = document.getElementById("confirmCheck");
+
+    if (!check.checked) {
+        alert("Please confirm you have watched the video.");
+        return;
+    }
+
+    document.getElementById("formSection").style.display = "block";
+    window.scrollTo({
+        top: document.getElementById("formSection").offsetTop,
+        behavior: "smooth"
+    });
+}
+</script>
+
+</body>
+</html>
